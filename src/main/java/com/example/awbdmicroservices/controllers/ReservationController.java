@@ -47,14 +47,21 @@ public class ReservationController {
     }
 
     @GetMapping("/event/{event}/person/{person}")
-    public List<Reservation> getReservationsByEventAndPerson(@PathVariable Long event, @PathVariable Long person) {
+    public CollectionModel<Reservation> getReservationsByEventAndPerson(@PathVariable Long event, @PathVariable Long person) {
         List<Reservation> reservations = reservationService.listByEventAndPerson(event, person);
 
-//        Link selfLink = linkTo(methodOn(ReservationController.class).showReservationList()).withSelfRel();
+        for(final Reservation reservation: reservations) {
+            Link selfLink = linkTo(methodOn(ReservationController.class).getReservation(reservation.getId())).withSelfRel();
+            reservation.add(selfLink);
 
-//        reservations.add(selfLink);
+            Link deleteLink = linkTo(methodOn(ReservationController.class).delete(reservation.getId())).withRel("deleteReservation");
+            reservation.add(deleteLink);
+        }
 
-        return reservations;
+        Link link = linkTo(methodOn(ReservationController.class).getReservationsByEventAndPerson(event, person)).withSelfRel();
+        CollectionModel<Reservation> result = CollectionModel.of(reservations, link);
+
+        return result;
     }
 
     @PostMapping("/save")
