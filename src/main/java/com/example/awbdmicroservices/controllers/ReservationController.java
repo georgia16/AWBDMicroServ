@@ -1,9 +1,12 @@
 package com.example.awbdmicroservices.controllers;
 
+import com.example.awbdmicroservices.models.Discount;
 import com.example.awbdmicroservices.models.Event;
 import com.example.awbdmicroservices.models.Person;
 import com.example.awbdmicroservices.models.Reservation;
 import com.example.awbdmicroservices.services.ReservationService;
+import com.example.awbdmicroservices.services.clients.DiscountServiceProxy;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
@@ -17,11 +20,14 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
+@Slf4j
 @RequestMapping("/reservations")
 public class ReservationController {
     @Autowired
     ReservationService reservationService;
 
+    @Autowired
+    DiscountServiceProxy discountServiceProxy;
 
     @GetMapping(value = "/list")
     public CollectionModel<Reservation> findAll() {
