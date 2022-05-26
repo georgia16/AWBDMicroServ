@@ -24,7 +24,7 @@ public class EventController {
     DiscountServiceProxy discountServiceProxy;
 
     @GetMapping("/{id}")
-    @CircuitBreaker(name="eventById")
+    @CircuitBreaker(name="eventById", fallbackMethod = "getDiscountFallback")
     public Event getEvent(@PathVariable Long id) {
 
         Event event = eventService.getEventById(id);
@@ -33,6 +33,13 @@ public class EventController {
         log.info(discount.getInstanceId());
         event.setPrice(event.getPrice() * (100 - discount.getMonth()) / 100);
 
+        return event;
+    }
+
+    //resilience -> behaviour when error
+    //return event with no discount applied
+    private Event getDiscountFallback(Long id, Throwable throwable) {
+        Event event = eventService.getEventById(id);
         return event;
     }
 }
