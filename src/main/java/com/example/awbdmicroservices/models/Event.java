@@ -24,6 +24,8 @@ public class Event extends RepresentationModel<Event> {
 
     private String name;
 
+    private Integer duration;
+
     private Integer price;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.REMOVE)

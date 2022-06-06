@@ -1,11 +1,9 @@
 package com.example.awbdmicroservices.controllers;
 
-import com.example.awbdmicroservices.models.Discount;
-import com.example.awbdmicroservices.models.Event;
-import com.example.awbdmicroservices.models.Postpone;
-import com.example.awbdmicroservices.models.Reservation;
+import com.example.awbdmicroservices.models.*;
 import com.example.awbdmicroservices.services.EventService;
 import com.example.awbdmicroservices.services.clients.DiscountServiceProxy;
+import com.example.awbdmicroservices.services.clients.DurationServiceProxy;
 import com.example.awbdmicroservices.services.clients.PostponeServiceProxy;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +30,9 @@ public class EventController {
     @Autowired
     PostponeServiceProxy postponeServiceProxy;
 
+    @Autowired
+    DurationServiceProxy durationServiceProxy;
+
     @GetMapping("/{id}")
     @CircuitBreaker(name="eventById", fallbackMethod = "getDiscountFallback")
     public Event getEvent(@PathVariable Long id) {
@@ -39,12 +40,14 @@ public class EventController {
         Event event = eventService.getEventById(id);
         Discount discount = discountServiceProxy.findDiscount();
         Postpone postpone = postponeServiceProxy.findPostpone();
+        Duration duration = durationServiceProxy.findDuration();
 
         LocalDate date = event.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();;
 
         log.info(discount.getInstanceId());
         event.setPrice(event.getPrice() * (100 - discount.getMonth()) / 100);
         event.setDate(Date.valueOf(date.plusDays(postpone.getDays()).plusMonths(postpone.getMonths())));
+        event.setDuration(event.getDuration() + duration.getHours() + (duration.getDays()*24));
 
         return event;
     }
