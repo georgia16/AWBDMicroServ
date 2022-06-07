@@ -14,6 +14,7 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -91,6 +92,10 @@ public class PersonController {
     })
     public ResponseEntity<Person> create(@Valid @RequestBody Person person) {
         Person createdPerson = personService.save(person);
-        return ResponseEntity.created(URI.create("/agency" + createdPerson.getId())).body(createdPerson);
+        Link selfLink = linkTo(methodOn(PersonController.class).getPerson(createdPerson.getId())).withSelfRel();
+        Link deleteLink = linkTo(methodOn(PersonController.class).delete(createdPerson.getId())).withRel("deletePerson");
+
+        createdPerson.add(selfLink, deleteLink);
+        return ResponseEntity.created(URI.create("/person" + createdPerson.getId())).body(createdPerson);
     }
 }
