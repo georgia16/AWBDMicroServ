@@ -6,6 +6,12 @@ import com.example.awbdmicroservices.services.clients.DiscountServiceProxy;
 import com.example.awbdmicroservices.services.clients.DurationServiceProxy;
 import com.example.awbdmicroservices.services.clients.PostponeServiceProxy;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,7 +41,13 @@ public class EventController {
 
     @GetMapping("/{id}")
     @CircuitBreaker(name="eventById", fallbackMethod = "getDiscountFallback")
-    public Event getEvent(@PathVariable Long id) {
+    @Operation(summary = "Get event", description = "Retrieve an existing event based on a given id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "The event was successfully retrieved"),
+            @ApiResponse(responseCode = "404", description = "Wrong path"),
+            @ApiResponse(responseCode = "500", description = "Error on the server")
+    })
+    public Event getEvent(@PathVariable @Parameter(name = "id", description = "Event id", example = "1") Long id) {
 
         Event event = eventService.getEventById(id);
         Discount discount = discountServiceProxy.findDiscount();
